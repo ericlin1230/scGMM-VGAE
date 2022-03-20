@@ -17,15 +17,15 @@ class GraphConvSparse(nn.Module):
     """Create GraphConvSparse class, this is used to create the hidden layer, mean layer, and logstd layer
 
     Args:
-        nn (_type_): the parameters to initialize the class, such as seed, number of featuers, neurons, etc.
+        nn: the parameters to initialize the class, such as seed, number of featuers, neurons, etc.
     """
     def __init__(self, seed, input_dim, output_dim, activation = torch.sigmoid, **kwargs):
         """Initialize the GraphConvSparse class
 
         Args:
-            seed (_type_): The seed used to control randomization
-            input_dim (_type_): Input dimension
-            output_dim (_type_): Output dimension
+            seed: The seed used to control randomization
+            input_dim: Input dimension
+            output_dim: Output dimension
             activation (_type_, optional): Activation function for the graphs. Defaults to torch.sigmoid.
         """
         super(GraphConvSparse, self).__init__(**kwargs)
@@ -38,8 +38,8 @@ class GraphConvSparse(nn.Module):
         """Apllies the layer to the input objects
 
         Args:
-            inputs (_type_): Hidden layer of feature matrix
-            adj (_type_): Adjacency matrix
+            inputs: Hidden layer of feature matrix
+            adj: Adjacency matrix
 
         Returns:
             _type_: Return the output from the activation function
@@ -54,7 +54,7 @@ class GMM_VGAE(nn.Module):
     """A Gaussian Mixture Model based variational graph autoencoder
 
     Args:
-        nn (_type_): Inputs for intialization 
+        nn: Inputs for intialization 
     """
     def __init__(self, **kwargs):
         super(GMM_VGAE, self).__init__()
@@ -86,17 +86,17 @@ class GMM_VGAE(nn.Module):
         """Pretrain the model, saves the model to model.pk
 
         Args:
-            adj (_type_): Adjacency matrix
-            features (_type_): Feature matrix
-            adj_label (_type_): Adjacency Label
-            y (_type_): Truth Label
-            weight_tensor (_type_): Weight Tensor
-            norm (_type_): Normalization
-            optimizer (_type_): Selected optimzer
-            epochs (_type_): Amount of Epoch
-            lr (_type_): Learning Rate
-            save_path (_type_): Save path
-            dataset (_type_): Dataset name
+            adj: Adjacency matrix
+            features: Feature matrix
+            adj_label: Adjacency Label
+            y: Truth Label
+            weight_tensor: Weight Tensor
+            norm: Normalization
+            optimizer: Selected optimzer
+            epochs: Amount of Epoch
+            lr: Learning Rate
+            save_path: Save path
+            dataset: Dataset name
 
         Returns:
             _type_: Accuracy list
@@ -154,16 +154,16 @@ class GMM_VGAE(nn.Module):
         """_summary_
 
         Args:
-            features (_type_): Feature matrix
-            adj (_type_): Adjacency matrix
-            x_ (_type_): x_ from decoding
-            adj_label (_type_): Adjacency label
-            y (_type_): Truth Label
-            weight_tensor (_type_): _description_
-            norm (_type_): _description_
-            z_mu (_type_): Mean layer
-            z_sigma2_log (_type_): logstd layer
-            emb (_type_): Z from encoding
+            features: Feature matrix
+            adj: Adjacency matrix
+            x_: x_ from decoding
+            adj_label: Adjacency label
+            y: Truth Label
+            weight_tensor: _description_
+            norm: _description_
+            z_mu: Mean layer
+            z_sigma2_log: logstd layer
+            emb: Z from encoding
             L (int, optional): L. Defaults to 1.
 
         Returns:
@@ -194,18 +194,18 @@ class GMM_VGAE(nn.Module):
         """Training the model
 
         Args:
-            acc_list (_type_): List to store acc
-            adj_norm (_type_): Processed graph
-            features (_type_): Feature matrix
-            adj_label (_type_): Adjacency Label
-            y (_type_): Truth Label
-            weight_tensor (_type_): Weight Tensor
-            norm (_type_): Normalization
-            optimizer (_type_): Selected optimzer
-            epochs (_type_): Amount of Epoch
-            lr (_type_): Learning Rate
-            save_path (_type_): Save path
-            dataset (_type_): Dataset name
+            acc_list: List to store acc
+            adj_norm: Processed graph
+            features: Feature matrix
+            adj_label: Adjacency Label
+            y: Truth Label
+            weight_tensor: Weight Tensor
+            norm: Normalization
+            optimizer: Selected optimzer
+            epochs: Amount of Epoch
+            lr: Learning Rate
+            save_path: Save path
+            dataset: Dataset name
 
 
         Returns:
@@ -279,9 +279,9 @@ class GMM_VGAE(nn.Module):
         """Calculate gaussian pdfs log
 
         Args:
-            x (_type_): Z from encoding
-            mus (_type_): Mean layer
-            log_sigma2s (_type_): logstd layer
+            x: Z from encoding
+            mus: Mean layer
+            log_sigma2s: logstd layer
 
         Returns:
             _type_: Calculated result
@@ -295,9 +295,9 @@ class GMM_VGAE(nn.Module):
         """Calculate gaussian pdf log
 
         Args:
-            x (_type_): Z from encoding
-            mus (_type_): Mean layer
-            log_sigma2s (_type_): logstd layer
+            x: Z from encoding
+            mus: Mean layer
+            log_sigma2s: logstd layer
 
         Returns:
             _type_: Calculated result
@@ -309,7 +309,7 @@ class GMM_VGAE(nn.Module):
         """Predict the cluster label
 
         Args:
-            z (_type_): Z matrix from encoder
+            z: Z matrix from encoder
 
         Returns:
             _type_: Prediction in list
@@ -326,8 +326,8 @@ class GMM_VGAE(nn.Module):
         """Encoder of GMM-VGAE
 
         Args:
-            x_features (_type_): Feature matrix
-            adj (_type_): Adjacency matrix
+            x_features: Feature matrix
+            adj: Adjacency matrix
 
         Returns:
             _type_: Mean layer, logstd layer, z matrix
@@ -346,7 +346,7 @@ class GMM_VGAE(nn.Module):
         """Docder
 
         Args:
-            z (_type_): Z matrix from the encoder
+            z: Z matrix from the encoder
 
         Returns:
             _type_: Reconstructed graph
@@ -358,9 +358,9 @@ def random_uniform_init(input_dim, output_dim, seed):
     """Create Gaussian random noise
 
     Args:
-        input_dim (_type_): Input dimension
-        output_dim (_type_): Output diemsnion
-        seed (_type_): Seed
+        input_dim: Input dimension
+        output_dim: Output diemsnion
+        seed: Seed
 
     Returns:
         _type_: Random noise
@@ -378,8 +378,8 @@ class clustering_metrics():
         """Initialize the clustering metrics class
 
         Args:
-            true_label (_type_): The true label
-            predict_label (_type_): The predicted label
+            true_label: The true label
+            predict_label: The predicted label
         """
         self.true_label = true_label
         self.pred_label = predict_label

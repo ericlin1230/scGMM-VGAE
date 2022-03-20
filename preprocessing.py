@@ -8,7 +8,7 @@ def parse_index_file(filename):
     """Parse the index file path
 
     Args:
-        filename (_type_): The file name of the dataset
+        filename: The file name of the dataset
 
     Returns:
         _type_: List of files
@@ -22,9 +22,9 @@ def load_data(dataset, data_path, modified):
     """Load the data 
 
     Args:
-        dataset (_type_): Dataset name
-        data_path (_type_): Dataset file
-        modified (_type_): if the data is modified for no combination
+        dataset: Dataset name
+        data_path: Dataset file
+        modified: if the data is modified for no combination
 
     Returns:
         _type_: return the adjacency, feature matrix and label
@@ -62,7 +62,7 @@ def sparse_to_tuple(sparse_mx):
     """Convert sparse matrix to tuple
 
     Args:
-        sparse_mx (_type_): Sparse matrix
+        sparse_mx: Sparse matrix
 
     Returns:
         _type_: Tuple values
@@ -78,7 +78,7 @@ def preprocess_graph(adj):
     """Preprocess the graphs
 
     Args:
-        adj (_type_): Adjacency matrix
+        adj: Adjacency matrix
 
     Returns:
         _type_: normalized adjacency matrix
