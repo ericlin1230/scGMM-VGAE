@@ -1,20 +1,9 @@
 import numpy as np
-import torch
 from sklearn.metrics import normalized_mutual_info_score, adjusted_rand_score, f1_score
 
 nmi = normalized_mutual_info_score
 ari = adjusted_rand_score
 f1 = f1_score
-
-def cos_grad(grad1, grad2):
-    grad1_list = []
-    grad2_list = []
-    for i in range(len(grad1)):
-        grad1_list.append(grad1[i].flatten())
-        grad2_list.append(grad2[i].flatten())
-    grad1_vector = torch.cat(grad1_list, 0)
-    grad2_vector = torch.cat(grad2_list, 0)
-    return torch.dot(grad1_vector, grad2_vector) / ((torch.norm(grad1_vector)) * (torch.norm(grad2_vector)))
 
 def acc(y_true, y_pred):
     """

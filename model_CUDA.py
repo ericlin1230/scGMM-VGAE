@@ -14,7 +14,20 @@ from munkres import Munkres
 import csv
 
 class GraphConvSparse(nn.Module):
+    """Create GraphConvSparse class, this is used to create the hidden layer, mean layer, and logstd layer
+
+    Args:
+        nn (_type_): the parameters to initialize the class, such as seed, number of featuers, neurons, etc.
+    """
     def __init__(self, seed, input_dim, output_dim, activation = torch.sigmoid, **kwargs):
+        """Initialize the GraphConvSparse class
+
+        Args:
+            seed (_type_): The seed used to control randomization
+            input_dim (_type_): Input dimension
+            output_dim (_type_): Output dimension
+            activation (_type_, optional): Activation function for the graphs. Defaults to torch.sigmoid.
+        """
         super(GraphConvSparse, self).__init__(**kwargs)
         torch.manual_seed(seed)
         np.random.seed(seed)
@@ -22,27 +35,27 @@ class GraphConvSparse(nn.Module):
         self.activation = activation
         
     def forward(self, inputs, adj):
+        """Apllies the layer to the input objects
+
+        Args:
+            inputs (_type_): Hidden layer of feature matrix
+            adj (_type_): Adjacency matrix
+
+        Returns:
+            _type_: Return the output from the activation function
+        """
         x = inputs
         x = torch.mm(x, self.weight)
         x = torch.mm(adj, x)
         outputs = self.activation(x)
         return outputs
 
-def map_vector_to_clusters(y_true, y_pred):
-    y_true = y_true.astype(np.int64)
-    D = max(y_pred.max(), y_true.max()) + 1
-    w = np.zeros((D, D), dtype=np.int64)
-    for i in range(y_pred.size):
-        w[y_true[i], y_pred[i]] += 1
-    from scipy.optimize import linear_sum_assignment
-    row_ind, col_ind = linear_sum_assignment(w.max() - w)
-
-    y_true_mapped = np.zeros(y_pred.shape)
-    for i in range(y_pred.shape[0]):
-        y_true_mapped[i] = col_ind[y_true[i]]
-    return y_true_mapped.astype(int)
-
 class GMM_VGAE(nn.Module):
+    """A Gaussian Mixture Model based variational graph autoencoder
+
+    Args:
+        nn (_type_): Inputs for intialization 
+    """
     def __init__(self, **kwargs):
         super(GMM_VGAE, self).__init__()
         self.num_neurons = kwargs['num_neurons']
@@ -70,6 +83,24 @@ class GMM_VGAE(nn.Module):
         self.log_sigma2_c = nn.Parameter(torch.randn(self.nClusters, self.embedding_size),requires_grad=True)
                                   
     def pretrain(self, adj, features, adj_label, y, weight_tensor, norm, optimizer, epochs, lr, save_path, dataset):
+        """Pretrain the model, saves the model to model.pk
+
+        Args:
+            adj (_type_): Adjacency matrix
+            features (_type_): Feature matrix
+            adj_label (_type_): Adjacency Label
+            y (_type_): Truth Label
+            weight_tensor (_type_): Weight Tensor
+            norm (_type_): Normalization
+            optimizer (_type_): Selected optimzer
+            epochs (_type_): Amount of Epoch
+            lr (_type_): Learning Rate
+            save_path (_type_): Save path
+            dataset (_type_): Dataset name
+
+        Returns:
+            _type_: Accuracy list
+        """
         if  not os.path.exists(save_path + dataset + '/pretrain/model.pk'):
             if optimizer == "Adam":
                 opti = Adam(self.parameters(), lr=lr)
@@ -92,8 +123,11 @@ class GMM_VGAE(nn.Module):
             acc_list = []
             for _ in epoch_bar:
                 opti.zero_grad()
+                # Get Z from the Encoder
                 _,_, z = self.encode(features, adj)
+                # Get x from the docder
                 x_ = self.decode(z)
+                # Calculate loss
                 loss = norm*F.binary_cross_entropy(x_.view(-1), adj_label.to_dense().view(-1), weight = weight_tensor)
                 loss.backward()
                 opti.step()
@@ -117,6 +151,24 @@ class GMM_VGAE(nn.Module):
             self.load_state_dict(torch.load(save_path + dataset + '/pretrain/model.pk'))
       
     def ELBO_Loss(self, features, adj, x_, adj_label, y, weight_tensor, norm, z_mu, z_sigma2_log, emb, L=1):
+        """_summary_
+
+        Args:
+            features (_type_): Feature matrix
+            adj (_type_): Adjacency matrix
+            x_ (_type_): x_ from decoding
+            adj_label (_type_): Adjacency label
+            y (_type_): Truth Label
+            weight_tensor (_type_): _description_
+            norm (_type_): _description_
+            z_mu (_type_): Mean layer
+            z_sigma2_log (_type_): logstd layer
+            emb (_type_): Z from encoding
+            L (int, optional): L. Defaults to 1.
+
+        Returns:
+            _type_: Loss ELBO, Loss reconstruction, Loss Clustering
+        """
         np.random.seed(self.seed)
         torch.manual_seed(self.seed)
         pi = self.pi
@@ -139,6 +191,26 @@ class GMM_VGAE(nn.Module):
         return Loss_elbo, Loss_recons, Loss_clus 
    
     def train(self, acc_list, adj_norm, features, adj_label, y, weight_tensor, norm, optimizer, epochs, lr, save_path, dataset):
+        """Training the model
+
+        Args:
+            acc_list (_type_): List to store acc
+            adj_norm (_type_): Processed graph
+            features (_type_): Feature matrix
+            adj_label (_type_): Adjacency Label
+            y (_type_): Truth Label
+            weight_tensor (_type_): Weight Tensor
+            norm (_type_): Normalization
+            optimizer (_type_): Selected optimzer
+            epochs (_type_): Amount of Epoch
+            lr (_type_): Learning Rate
+            save_path (_type_): Save path
+            dataset (_type_): Dataset name
+
+
+        Returns:
+            _type_: Final list of interested parameters, y prediction
+        """
         self.load_state_dict(torch.load(save_path + dataset + '/pretrain/model.pk'))
         np.random.seed(self.seed)
         torch.manual_seed(self.seed)
@@ -154,33 +226,36 @@ class GMM_VGAE(nn.Module):
         if not os.path.exists(save_path):
             os.makedirs(save_path)
         
+        # Check if the device is cuda available, error if not
         print(torch.cuda.is_available())
         print(torch.cuda.current_device())
         print(torch.cuda.device(0))
         print(torch.cuda.device_count())
         print(torch.cuda.get_device_name(0))
 
+        # Logging the resluts
         logfile = open(save_path + dataset + '/cluster/log.csv', 'w')
-        
         logwriter = csv.DictWriter(logfile, fieldnames=['iter', 'acc', 'nmi', 'ari', 'f1_macro', 'f1_micro', 'precision_macro', 'precision_micro', 'Loss_recons', 'Loss_clus' , 'Loss_elbo'])
-        
         logwriter.writeheader()
         
         epoch_bar=tqdm(range(epochs))
         
         print('Training......')
         
-        loss_list = []
-        grad_loss_list = [] 
         count =0
         currmax = 0
         finalist = []
         for epoch in epoch_bar:
             opti.zero_grad()
+            # Encoding
             z_mu, z_sigma2_log, emb = self.encode(features, adj_norm) 
+            # Decoding
             x_ = self.decode(emb)
+            # Loss calculation 
             Loss_elbo, Loss_recons, Loss_clus = self.ELBO_Loss(features, adj_norm, x_, adj_label.to_dense().view(-1), y, weight_tensor, norm, z_mu , z_sigma2_log, emb)
             epoch_bar.write('Loss={:.4f}'.format(Loss_elbo.detach().cpu().numpy()))
+
+            # Prediction and metrics
             y_pred = self.predict(emb)
             cm = clustering_metrics(y, y_pred)
             acc, nmi, adjscore, f1_macro, precision_macro, f1_micro, precision_micro = cm.evaluationClusterModelFromLabel()
@@ -201,16 +276,44 @@ class GMM_VGAE(nn.Module):
         return finalist, y_pred, y
                
     def gaussian_pdfs_log(self,x,mus,log_sigma2s):
+        """Calculate gaussian pdfs log
+
+        Args:
+            x (_type_): Z from encoding
+            mus (_type_): Mean layer
+            log_sigma2s (_type_): logstd layer
+
+        Returns:
+            _type_: Calculated result
+        """
         G=[]
         for c in range(self.nClusters):
             G.append(self.gaussian_pdf_log(x,mus[c:c+1,:],log_sigma2s[c:c+1,:]).view(-1,1))
         return torch.cat(G,1)
 
     def gaussian_pdf_log(self,x,mu,log_sigma2):
+        """Calculate gaussian pdf log
+
+        Args:
+            x (_type_): Z from encoding
+            mus (_type_): Mean layer
+            log_sigma2s (_type_): logstd layer
+
+        Returns:
+            _type_: Calculated result
+        """
         c = -0.5 * torch.sum(np.log(np.pi*2)+log_sigma2+(x-mu).pow(2)/torch.exp(log_sigma2),1)
         return c
 
     def predict(self, z):
+        """Predict the cluster label
+
+        Args:
+            z (_type_): Z matrix from encoder
+
+        Returns:
+            _type_: Prediction in list
+        """
         pi = self.pi
         log_sigma2_c = self.log_sigma2_c  
         mu_c = self.mu_c
@@ -220,6 +323,15 @@ class GMM_VGAE(nn.Module):
         return np.argmax(yita, axis=1)
 
     def encode(self, x_features, adj):
+        """Encoder of GMM-VGAE
+
+        Args:
+            x_features (_type_): Feature matrix
+            adj (_type_): Adjacency matrix
+
+        Returns:
+            _type_: Mean layer, logstd layer, z matrix
+        """
         hidden = self.base_gcn(x_features, adj)
         self.mean = self.gcn_mean(hidden, adj)
         self.logstd = self.gcn_logstddev(hidden, adj)
@@ -231,10 +343,28 @@ class GMM_VGAE(nn.Module):
             
     @staticmethod
     def decode(z):
+        """Docder
+
+        Args:
+            z (_type_): Z matrix from the encoder
+
+        Returns:
+            _type_: Reconstructed graph
+        """
         A_pred = torch.sigmoid(torch.matmul(z,z.t()))
         return A_pred
         
 def random_uniform_init(input_dim, output_dim, seed):
+    """Create Gaussian random noise
+
+    Args:
+        input_dim (_type_): Input dimension
+        output_dim (_type_): Output diemsnion
+        seed (_type_): Seed
+
+    Returns:
+        _type_: Random noise
+    """
     np.random.seed(seed)
     init_range = np.sqrt(6.0 / (input_dim + output_dim))
     torch.manual_seed(seed)
@@ -242,11 +372,24 @@ def random_uniform_init(input_dim, output_dim, seed):
     return nn.Parameter(initial)
   
 class clustering_metrics():
+    """Class for calculation of metrics
+    """
     def __init__(self, true_label, predict_label):
+        """Initialize the clustering metrics class
+
+        Args:
+            true_label (_type_): The true label
+            predict_label (_type_): The predicted label
+        """
         self.true_label = true_label
         self.pred_label = predict_label
 
     def clusteringAcc(self):
+        """Calculate the best mapping between true and predict label
+
+        Returns:
+            _type_: Accuracy 
+        """
         # best mapping between true_label and predict label
         l1 = list(set(self.true_label))
         numclass1 = len(l1)
@@ -295,6 +438,11 @@ class clustering_metrics():
         return acc, f1_macro, precision_macro, recall_macro, f1_micro, precision_micro, recall_micro
 
     def evaluationClusterModelFromLabel(self):
+        """Calculate evaluation metrics using sklearn functions
+
+        Returns:
+            _type_: List of interested metrics
+        """
         nmi = metrics.normalized_mutual_info_score(self.true_label, self.pred_label)
         adjscore = adjusted_rand_score(self.true_label, self.pred_label)
         acc, f1_macro, precision_macro, recall_macro, f1_micro, precision_micro, recall_micro = self.clusteringAcc()

@@ -26,6 +26,7 @@ lr_pretrain = 0.01
 epochs_cluster = 200
 lr_cluster = 0.01
 
+# COnfigure the device to cuda
 torch.set_default_tensor_type('torch.cuda.FloatTensor') 
 device = torch.device("cuda")
 # Data processing 
@@ -46,13 +47,12 @@ weight_tensor_orig = torch.ones(weight_mask_orig.size(0))
 weight_tensor_orig[weight_mask_orig] = pos_weight_orig
 
 print("start")
+# Start the timer
 start = time.perf_counter()
 # Training
 acc_array = []
 
 from random import randint
-import math
-maxari = -math.inf
 ress = []
 seed = randint(1,100000) # Change seed here
 network = GMM_VGAE(adj = adj_norm , num_neurons=num_neurons, num_features=num_features, embedding_size=embedding_size, nClusters=nClusters, activation="Sigmoid", seed=seed)
