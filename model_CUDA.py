@@ -10,6 +10,9 @@ from sklearn.mixture import GaussianMixture
 from torch.optim.lr_scheduler import StepLR
 from sklearn import metrics
 from sklearn.metrics.cluster import adjusted_rand_score
+from sklearn.metrics import silhouette_score
+from sklearn.metrics import calinski_harabasz_score
+from sklearn.metrics import davies_bouldin_score
 from munkres import Munkres
 import csv
 
@@ -82,7 +85,7 @@ class GMM_VGAE(nn.Module):
         self.mu_c = nn.Parameter(torch.randn(self.nClusters, self.embedding_size), requires_grad=True)
         self.log_sigma2_c = nn.Parameter(torch.randn(self.nClusters, self.embedding_size),requires_grad=True)
                                   
-    def pretrain(self, adj, features, adj_label, y, weight_tensor, norm, optimizer, epochs, lr, save_path, dataset):
+    def pretrain(self, adj, features, adj_label, y, weight_tensor, norm, optimizer, epochs, lr, save_path, dataset, features_new):
         """Pretrain the model, saves the model to model.pk
 
         Args:
@@ -190,7 +193,7 @@ class GMM_VGAE(nn.Module):
         Loss_elbo =  Loss_recons + Loss_clus 
         return Loss_elbo, Loss_recons, Loss_clus 
    
-    def train(self, acc_list, adj_norm, features, adj_label, y, weight_tensor, norm, optimizer, epochs, lr, save_path, dataset):
+    def train(self, acc_list, adj_norm, features, adj_label, y, weight_tensor, norm, optimizer, epochs, lr, save_path, dataset, features_new):
         """Training the model
 
         Args:
@@ -235,7 +238,8 @@ class GMM_VGAE(nn.Module):
 
         # Logging the resluts
         logfile = open(save_path + dataset + '/cluster/log.csv', 'w')
-        logwriter = csv.DictWriter(logfile, fieldnames=['iter', 'acc', 'nmi', 'ari', 'f1_macro', 'f1_micro', 'precision_macro', 'precision_micro', 'Loss_recons', 'Loss_clus' , 'Loss_elbo'])
+        # logwriter = csv.DictWriter(logfile, fieldnames=['iter', 'acc', 'nmi', 'ari', 'f1_macro', 'f1_micro', 'precision_macro', 'precision_micro', 'Loss_recons', 'Loss_clus' , 'Loss_elbo'])
+        logwriter = csv.DictWriter(logfile, fieldnames=['iter', 'acc', 'nmi', 'ari', 'silhouette','davies', 'calinski', 'Loss_elbo'])
         logwriter.writeheader()
         
         epoch_bar=tqdm(range(epochs))
@@ -260,9 +264,13 @@ class GMM_VGAE(nn.Module):
             cm = clustering_metrics(y, y_pred)
             acc, nmi, adjscore, f1_macro, precision_macro, f1_micro, precision_micro = cm.evaluationClusterModelFromLabel()
             acc_list.append(acc)
+            sc = silhouette_score(features_new, y_pred, metric="cosine")
+            calinski = calinski_harabasz_score(features_new, y_pred)
+            davies = davies_bouldin_score(features_new, y_pred)
             
             #Save logs 
-            logdict = dict(iter = epoch, acc = acc, nmi= nmi, ari=adjscore, f1_macro=f1_macro , f1_micro=f1_micro, precision_macro=precision_macro, precision_micro = precision_micro, Loss_recons=Loss_recons.detach().cpu().numpy(), Loss_clus=Loss_clus.detach().cpu().numpy(), Loss_elbo=Loss_elbo.detach().cpu().numpy())
+            # logdict = dict(iter = epoch, acc = acc, nmi= nmi, ari=adjscore, f1_macro=f1_macro , f1_micro=f1_micro, precision_macro=precision_macro, precision_micro = precision_micro, Loss_recons=Loss_recons.detach().cpu().numpy(), Loss_clus=Loss_clus.detach().cpu().numpy(), Loss_elbo=Loss_elbo.detach().cpu().numpy())
+            logdict = dict(iter = epoch, acc = acc, nmi= nmi, ari=adjscore, silhouette= sc, calinski=calinski, davies=davies, Loss_elbo=Loss_elbo.detach().cpu().numpy())
             logwriter.writerow(logdict)
             logfile.flush() 
             

@@ -6,7 +6,6 @@
 **Results:** Using adjusted Rand index (ARI) as model performance measure, we showed the GMM-VGAE algorithm has better performance than other baseline models in all three datasets. With ARI of 0.940 for the Baron3 dataaset, 0.948 for Baron4 dataset, and 0.936 for Darmanis dataset.\
 **Conclusions:** Combination of statistical modeling and unsupervised deep learning algorithm can be successfully applied to analyze scRNA-seq data. By incorporating GMM-VGAE algorithm in scRNA sequencing, the performance of future analysis and application can be enhanced.
 
-
 **Keywords**: single cell RNA-sequencing, gaussian mixture model-based variational graph autoencoder, unsupervised clustering, deep learning
 
 ![archi](archi5.png)

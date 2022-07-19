@@ -10,12 +10,13 @@ dataset = "baron4"
 print("baron4 dataset")
 nClusters = 14
 adj, features, labels = load_data('baron4', './data/baron4', True)
+features_new = features.toarray()
 num_nodes = features.shape[0]
 num_features = features.shape[1]
 
 # Network parameters
-num_neurons = 24
-embedding_size = 12
+num_neurons = 48
+embedding_size = 24
 save_path = "./results/"
 
 # Pretraining parameters
@@ -54,13 +55,12 @@ acc_array = []
 
 from random import randint
 ress = []
-seed = randint(1,100000) # Change seed here
+seed = 44875 # Change seed here
 network = GMM_VGAE(adj = adj_norm , num_neurons=num_neurons, num_features=num_features, embedding_size=embedding_size, nClusters=nClusters, activation="Sigmoid", seed=seed)
 network.to(device)
-acc_array = network.pretrain(adj_norm, features, adj_label, labels, weight_tensor_orig, norm, optimizer="Adam", epochs=epochs_pretrain, lr=lr_pretrain, save_path=save_path, dataset=dataset)
+acc_array = network.pretrain(adj_norm, features, adj_label, labels, weight_tensor_orig, norm, optimizer="Adam", epochs=epochs_pretrain, lr=lr_pretrain, save_path=save_path, dataset=dataset, features_new=features_new)
 network.to(device)
-res, y_pred, y = network.train([], adj_norm, features, adj_label, labels, weight_tensor_orig, norm, optimizer="Adam", epochs=epochs_cluster, lr=lr_cluster, save_path=save_path, dataset=dataset)
-
+res, y_pred, y = network.train([], adj_norm, features, adj_label, labels, weight_tensor_orig, norm, optimizer="Adam", epochs=epochs_cluster, lr=lr_cluster, save_path=save_path, dataset=dataset, features_new=features_new)
 end = time.perf_counter()
 
 print(f"Total time: {end - start:0.4f} seconds")
