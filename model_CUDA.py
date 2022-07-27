@@ -143,19 +143,19 @@ class GMM_VGAE(nn.Module):
                 self.pi.data = torch.from_numpy(gmm.weights_)
                 self.mu_c.data = torch.from_numpy(gmm.means_)
                 self.log_sigma2_c.data =  torch.log(torch.from_numpy(gmm.covariances_))
-                
-                # acc = mt.acc(y, y_pred)
-                # acc_list.append(acc)
-                # if (acc > acc_best):
-                #   acc_best = acc
-                #   self.logstd = self.mean 
-                #   torch.save(self.state_dict(), save_path + dataset + '/pretrain/model.pk')
 
-                sc = silhouette_score(features_new, y_pred, metric="cosine")
-                if (sc > sc_best):
-                  sc_best = sc
+                acc = mt.acc(y, y_pred)
+                acc_list.append(acc)
+                if (acc > acc_best):
+                  acc_best = acc
                   self.logstd = self.mean 
                   torch.save(self.state_dict(), save_path + dataset + '/pretrain/model.pk')
+
+                # sc = silhouette_score(features_new, y_pred, metric="cosine")
+                # if (sc > sc_best):
+                #   sc_best = sc
+                #   self.logstd = self.mean 
+                #   torch.save(self.state_dict(), save_path + dataset + '/pretrain/model.pk')
 
             print("Best accuracy : ",acc_best)
             return acc_list
