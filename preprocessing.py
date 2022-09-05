@@ -4,6 +4,8 @@ import pickle as pkl
 import networkx as nx
 import scipy.sparse as sp
 
+#below code was adapted from https://github.com/nairouz/R-GAE/tree/master/GMM-VGAE here. We thank for the authors to make it publicly available 
+
 def parse_index_file(filename):
     """Parse the index file path
 

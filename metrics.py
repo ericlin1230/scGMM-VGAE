@@ -1,6 +1,8 @@
 import numpy as np
 from sklearn.metrics import normalized_mutual_info_score, adjusted_rand_score, f1_score
 
+#below code was adapted from https://github.com/nairouz/R-GAE/tree/master/GMM-VGAE here. We thank for the authors to make it publicly available 
+
 nmi = normalized_mutual_info_score
 ari = adjusted_rand_score
 f1 = f1_score

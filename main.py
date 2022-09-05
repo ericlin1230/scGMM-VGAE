@@ -5,6 +5,8 @@ from model_CUDA import GMM_VGAE
 from preprocessing import load_data, sparse_to_tuple, preprocess_graph
 import time
 
+#below code was adapted from https://github.com/nairouz/R-GAE/tree/master/GMM-VGAE here. We thank for the authors to make it publicly available 
+
 # Dataset Name
 dataset = "baron4"
 print("baron4 dataset")

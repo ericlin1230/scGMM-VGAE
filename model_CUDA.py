@@ -16,6 +16,8 @@ from sklearn.metrics import davies_bouldin_score
 from munkres import Munkres
 import csv
 
+#below code was adapted from https://github.com/nairouz/R-GAE/tree/master/GMM-VGAE here. We thank for the authors to make it publicly available 
+
 class GraphConvSparse(nn.Module):
     """Create GraphConvSparse class, this is used to create the hidden layer, mean layer, and logstd layer
 
